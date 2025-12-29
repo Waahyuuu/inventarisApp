@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@android:color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/imgBarangPlaceholder"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:background="#F0F0F0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvNamaBarang"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Laptop Dell"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imgBarangPlaceholder"
+            app:layout_constraintTop_toTopOf="@id/imgBarangPlaceholder" />
+
+        <TextView
+            android:id="@+id/tvKategori"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Elektronik"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintStart_toStartOf="@id/tvNamaBarang"
+            app:layout_constraintTop_toBottomOf="@id/tvNamaBarang" />
+
+        <TextView
+            android:id="@+id/tvDeskripsi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Laptop untuk karyawan"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="2dp"
+            app:layout_constraintStart_toStartOf="@id/tvNamaBarang"
+            app:layout_constraintTop_toBottomOf="@id/tvKategori" />
+
+        <TextView
+            android:id="@+id/tvStok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#E0F2F1"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="Stok: 16"
+            android:textColor="#00695C"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/tvNamaBarang"
+            app:layout_constraintTop_toBottomOf="@id/tvDeskripsi" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="#F0F0F0"
+            app:layout_constraintTop_toBottomOf="@id/tvStok" />
+
+        <LinearLayout
+            android:id="@+id/btnTransaksi"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="8dp"
+            android:background="#E3F2FD"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toStartOf="@id/btnEdit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Transaksi"
+                android:textColor="#1976D2"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnEdit"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#F5F5F5"
+            android:src="@android:drawable/ic_menu_edit"
+            app:tint="@android:color/darker_gray"
+            android:padding="10dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/btnTransaksi"
+            app:layout_constraintEnd_toStartOf="@id/btnDelete"
+            app:layout_constraintTop_toTopOf="@id/btnTransaksi" />
+
+        <ImageButton
+            android:id="@+id/btnDelete"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#FFEBEE"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="#D32F2F"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/btnTransaksi"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btnTransaksi" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
