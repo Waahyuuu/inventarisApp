@@ -1,6 +1,8 @@
 package com.example.inventarisapp.api
 
 import com.example.inventarisapp.entity.Barang
+import com.example.inventarisapp.entity.HasTransaksiResponse
+import com.example.inventarisapp.entity.TransaksiResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -26,7 +28,7 @@ interface ApiService {
         @Path("id") id: String,
         @Part("namaBarang") namaBarang: RequestBody,
         @Part("kategori") kategori: RequestBody,
-        @Part("stok") stok: RequestBody,
+        @Part("stok") stok: RequestBody?,
         @Part("deskripsi") deskripsi: RequestBody,
         @Part images: MultipartBody.Part?
     ): Call<Barang>
@@ -40,4 +42,18 @@ interface ApiService {
     fun getBarangById(
         @Path("id") id: String
     ): Call<Barang>
+
+    @GET("barang/{id}/has-transaksi")
+    fun hasTransaksi(
+        @Path("id") id: String
+    ): Call<HasTransaksiResponse>
+
+    @FormUrlEncoded
+    @POST("transaksi")
+    fun simpanTransaksi(
+        @Field("barang_id") barangId: String,
+        @Field("qty") qty: Int,
+        @Field("jenis_transaksi") jenis: String,
+        @Field("catatan") catatan: String?
+    ): Call<TransaksiResponse>
 }

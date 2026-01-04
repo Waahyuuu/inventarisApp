@@ -23,7 +23,7 @@ class BarangAdapter(
             binding.tvDeskripsi.text = item.deskripsi
             binding.tvStok.text = "Stok: ${item.stok}"
 
-            val imageUrl = "http://192.168.18.111:8000/storage/images/${item.images}"
+            val imageUrl = "http://192.168.0.3:8000/storage/images/${item.images}"
             Glide.with(binding.root.context)
                 .load(imageUrl)
                 .placeholder(android.R.color.darker_gray)

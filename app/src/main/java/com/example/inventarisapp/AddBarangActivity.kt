@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.inventarisapp.api.ApiClient
 import com.example.inventarisapp.databinding.ActivityAddBarangBinding
 import com.example.inventarisapp.entity.Barang
+import com.example.inventarisapp.entity.HasTransaksiResponse
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -28,20 +29,17 @@ class AddBarangActivity : AppCompatActivity() {
     private var idBarang: String? = null
     private var selectedImageUri: Uri? = null
     private var listKategori: List<String> = emptyList()
-
+    private var stokLocked = false
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-
                 selectedImageUri = result.data?.data
 
                 binding.imgPreview.visibility = View.VISIBLE
                 binding.iconCamera.visibility = View.GONE
                 binding.textTambahFoto.visibility = View.GONE
 
-                Glide.with(this)
-                    .load(selectedImageUri)
-                    .into(binding.imgPreview)
+                Glide.with(this).load(selectedImageUri).into(binding.imgPreview)
             }
         }
 
@@ -65,16 +63,17 @@ class AddBarangActivity : AppCompatActivity() {
             binding.edtDeskripsi.setText(intent.getStringExtra("deskripsi"))
 
             val imageUrl = intent.getStringExtra("images")
-
             if (!imageUrl.isNullOrEmpty()) {
                 binding.imgPreview.visibility = View.VISIBLE
                 binding.iconCamera.visibility = View.GONE
                 binding.textTambahFoto.visibility = View.GONE
 
-                Glide.with(this)
-                    .load("http://192.168.18.111:8000/storage/images/$imageUrl")
+                Glide.with(this).load("http://192.168.0.3:8000/storage/images/$imageUrl")
                     .into(binding.imgPreview)
             }
+
+            // cek transaksi
+            cekTransaksiBarang(idBarang!!)
         }
 
         binding.btnBack.setOnClickListener { finish() }
@@ -90,20 +89,29 @@ class AddBarangActivity : AppCompatActivity() {
         binding.iconDropdownKategori.setOnClickListener { showKategoriDropdown() }
 
         binding.btnSimpan.setOnClickListener {
+
             val nama = binding.edtNama.text.toString()
             val kategori = binding.edtKategori.text.toString()
-            val stokStr = binding.edtStok.text.toString()
             val deskripsi = binding.edtDeskripsi.text.toString()
+            val stokStr = binding.edtStok.text.toString()
 
-            if (nama.isEmpty() || kategori.isEmpty() || stokStr.isEmpty()) {
+            if (nama.isEmpty() || kategori.isEmpty()) {
                 Toast.makeText(this, "Mohon isi semua data!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            val stokValue: Int? = if (stokLocked) null
+            else stokStr.toIntOrNull()
+
+            if (!stokLocked && stokValue == null) {
+                Toast.makeText(this, "Stok tidak valid", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (idBarang != null) {
-                updateBarang(idBarang!!, nama, kategori, stokStr.toInt(), deskripsi)
+                updateBarang(idBarang!!, nama, kategori, stokValue, deskripsi)
             } else {
-                simpanBarang(nama, kategori, stokStr.toInt(), deskripsi)
+                simpanBarang(nama, kategori, stokValue!!, deskripsi)
             }
         }
     }
@@ -111,17 +119,14 @@ class AddBarangActivity : AppCompatActivity() {
     private fun ambilKategoriDariAPI() {
         ApiClient.dataBarang.getAllBarang().enqueue(object : Callback<List<Barang>> {
             override fun onResponse(
-                call: Call<List<Barang>>,
-                response: Response<List<Barang>>
+                call: Call<List<Barang>>, response: Response<List<Barang>>
             ) {
                 if (response.isSuccessful) {
-                    val data = response.body() ?: emptyList()
-                    listKategori = data.map { it.kategori }.distinct()
+                    listKategori = response.body()?.map { it.kategori }?.distinct() ?: emptyList()
                 }
             }
 
-            override fun onFailure(call: Call<List<Barang>>, t: Throwable) {
-            }
+            override fun onFailure(call: Call<List<Barang>>, t: Throwable) {}
         })
     }
 
@@ -135,8 +140,8 @@ class AddBarangActivity : AppCompatActivity() {
             listKategori.forEach { popup.menu.add(it) }
         }
 
-        popup.setOnMenuItemClickListener { item ->
-            binding.edtKategori.setText(item.title)
+        popup.setOnMenuItemClickListener {
+            binding.edtKategori.setText(it.title)
             true
         }
 
@@ -146,24 +151,21 @@ class AddBarangActivity : AppCompatActivity() {
     private fun simpanBarang(nama: String, kategori: String, stok: Int, deskripsi: String) {
         loading(true)
 
-        val rbNama = nama.toRequestBody("text/plain".toMediaTypeOrNull())
-        val rbKategori = kategori.toRequestBody("text/plain".toMediaTypeOrNull())
-        val rbStok = stok.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val rbDeskripsi = deskripsi.toRequestBody("text/plain".toMediaTypeOrNull())
-
-        val imagePart = prepareImage()
-
         ApiClient.dataBarang.addBarang(
-            rbNama, rbKategori, rbStok, rbDeskripsi, imagePart
+            nama.toRequestBody("text/plain".toMediaTypeOrNull()),
+            kategori.toRequestBody("text/plain".toMediaTypeOrNull()),
+            stok.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+            deskripsi.toRequestBody("text/plain".toMediaTypeOrNull()),
+            prepareImage()
         ).enqueue(object : Callback<Barang> {
             override fun onResponse(call: Call<Barang>, response: Response<Barang>) {
                 loading(false)
                 if (response.isSuccessful) {
-                    Toast.makeText(this@AddBarangActivity, "Berhasil tambah barang!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@AddBarangActivity, "Berhasil tambah barang!", Toast.LENGTH_SHORT
+                    ).show()
                     finish()
-                } else {
-                    showError("Gagal menambah barang")
-                }
+                } else showError("Gagal menambah barang")
             }
 
             override fun onFailure(call: Call<Barang>, t: Throwable) {
@@ -173,24 +175,33 @@ class AddBarangActivity : AppCompatActivity() {
         })
     }
 
-    private fun updateBarang(id: String, nama: String, kategori: String, stok: Int, deskripsi: String) {
+    private fun updateBarang(
+        id: String, nama: String, kategori: String, stok: Int?, deskripsi: String
+    ) {
         loading(true)
 
-        val rbNama = nama.toRequestBody("text/plain".toMediaTypeOrNull())
-        val rbKategori = kategori.toRequestBody("text/plain".toMediaTypeOrNull())
-        val rbStok = stok.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-        val rbDeskripsi = deskripsi.toRequestBody("text/plain".toMediaTypeOrNull())
-
-        val imagePart = prepareImage()
-
         ApiClient.dataBarang.updateBarang(
-            id, rbNama, rbKategori, rbStok, rbDeskripsi, imagePart
+            id,
+            nama.toRequestBody("text/plain".toMediaTypeOrNull()),
+            kategori.toRequestBody("text/plain".toMediaTypeOrNull()),
+            stok?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
+            deskripsi.toRequestBody("text/plain".toMediaTypeOrNull()),
+            prepareImage()
         ).enqueue(object : Callback<Barang> {
+
             override fun onResponse(call: Call<Barang>, response: Response<Barang>) {
                 loading(false)
                 if (response.isSuccessful) {
-                    Toast.makeText(this@AddBarangActivity, "Berhasil update barang!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@AddBarangActivity, "Berhasil update barang!", Toast.LENGTH_SHORT
+                    ).show()
                     finish()
+                } else if (response.code() == 403) {
+                    Toast.makeText(
+                        this@AddBarangActivity,
+                        "Stok tidak dapat diubah karena sudah ada transaksi",
+                        Toast.LENGTH_LONG
+                    ).show()
                 } else {
                     showError("Gagal update barang")
                 }
@@ -201,12 +212,32 @@ class AddBarangActivity : AppCompatActivity() {
                 showError(t.message)
             }
         })
+    }
 
+    private fun cekTransaksiBarang(id: String) {
+        ApiClient.dataBarang.hasTransaksi(id).enqueue(object : Callback<HasTransaksiResponse> {
+            override fun onResponse(
+                call: Call<HasTransaksiResponse>, response: Response<HasTransaksiResponse>
+            ) {
+                if (response.isSuccessful && response.body()?.has_transaksi == true) {
+                    stokLocked = true
+                    lockStokUI()
+                }
+            }
+
+            override fun onFailure(call: Call<HasTransaksiResponse>, t: Throwable) {}
+        })
+    }
+
+    private fun lockStokUI() {
+        binding.edtStok.isEnabled = false
+        binding.edtStok.alpha = 0.6f
+        binding.edtStok.keyListener = null
     }
 
     private fun prepareImage(): MultipartBody.Part? {
-        return selectedImageUri?.let { uri ->
-            val file = uriToFile(uri)
+        return selectedImageUri?.let {
+            val file = uriToFile(it)
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             MultipartBody.Part.createFormData("images", file.name, requestFile)
         }
@@ -214,14 +245,10 @@ class AddBarangActivity : AppCompatActivity() {
 
     private fun uriToFile(uri: Uri): File {
         val inputStream = contentResolver.openInputStream(uri)!!
-        val tempFile = File(cacheDir, "upload_image_${System.currentTimeMillis()}.jpg")
-        val outputStream = tempFile.outputStream()
-
-        inputStream.copyTo(outputStream)
+        val file = File(cacheDir, "upload_${System.currentTimeMillis()}.jpg")
+        inputStream.copyTo(file.outputStream())
         inputStream.close()
-        outputStream.close()
-
-        return tempFile
+        return file
     }
 
     private fun loading(state: Boolean) {
