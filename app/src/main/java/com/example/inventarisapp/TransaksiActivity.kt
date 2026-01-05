@@ -197,7 +197,7 @@ class TransaksiActivity : AppCompatActivity() {
         }
 
         Glide.with(this)
-            .load("http://192.168.0.3:8000/storage/images/$imageUrl")
+            .load("http://192.168.18.11:8000/storage/images/$imageUrl")
             .centerCrop()
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(

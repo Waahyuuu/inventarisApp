@@ -40,6 +40,23 @@
             app:layout_constraintStart_toStartOf="@id/tvAppTitle"
             app:layout_constraintTop_toBottomOf="@id/tvAppTitle" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnHistori"
+            android:layout_width="wrap_content"
+            android:layout_height="45dp"
+            android:layout_marginEnd="20dp"
+            android:text="Riwayat"
+            android:textSize="14sp"
+            app:icon="@android:drawable/ic_menu_recent_history"
+            app:iconSize="22dp"
+            app:iconPadding="0dp"
+            android:gravity="center"
+            app:iconGravity="textStart"
+            app:backgroundTint="#1E88E5"
+            app:cornerRadius="18dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvAppTitle" />
+
         <LinearLayout
             android:id="@+id/containerStats"
             android:layout_width="match_parent"

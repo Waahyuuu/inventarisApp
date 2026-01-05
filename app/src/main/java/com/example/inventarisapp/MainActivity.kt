@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == 1001 && resultCode == RESULT_OK) {
-            viewModel.getListBarang() // 🔥 refresh stok
+            viewModel.getListBarang()
         }
     }
 
@@ -83,6 +83,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupAction() {
+        binding.btnHistori.setOnClickListener {
+            startActivity(
+                Intent(this, RiwayatTransaksiActivity::class.java)
+            )
+        }
+
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, AddBarangActivity::class.java))
         }
@@ -163,7 +169,7 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("stok", barang.stok)
         intent.putExtra("images", barang.images)
 
-        startActivityForResult(intent, 1001)
+        startActivity(intent)
     }
 
     private fun observeNetworkState() {
@@ -189,7 +195,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        connectivityManager.unregisterNetworkCallback(networkCallback)
+        try {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        } catch (e: Exception) {
+            // aman
+        }
     }
 
     private fun showNoInternetAlert() {

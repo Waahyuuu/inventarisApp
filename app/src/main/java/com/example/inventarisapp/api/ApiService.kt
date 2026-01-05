@@ -2,6 +2,7 @@ package com.example.inventarisapp.api
 
 import com.example.inventarisapp.entity.Barang
 import com.example.inventarisapp.entity.HasTransaksiResponse
+import com.example.inventarisapp.entity.Transaksi
 import com.example.inventarisapp.entity.TransaksiResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -56,4 +57,7 @@ interface ApiService {
         @Field("jenis_transaksi") jenis: String,
         @Field("catatan") catatan: String?
     ): Call<TransaksiResponse>
+
+    @GET("transaksi")
+    fun getTransaksi(): Call<List<Transaksi>>
 }

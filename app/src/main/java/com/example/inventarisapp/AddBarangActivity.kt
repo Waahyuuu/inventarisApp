@@ -9,6 +9,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.inventarisapp.api.ApiClient
 import com.example.inventarisapp.databinding.ActivityAddBarangBinding
@@ -68,7 +69,7 @@ class AddBarangActivity : AppCompatActivity() {
                 binding.iconCamera.visibility = View.GONE
                 binding.textTambahFoto.visibility = View.GONE
 
-                Glide.with(this).load("http://192.168.0.3:8000/storage/images/$imageUrl")
+                Glide.with(this).load("http://192.168.18.11:8000/storage/images/$imageUrl")
                     .into(binding.imgPreview)
             }
 
@@ -230,9 +231,26 @@ class AddBarangActivity : AppCompatActivity() {
     }
 
     private fun lockStokUI() {
-        binding.edtStok.isEnabled = false
-        binding.edtStok.alpha = 0.6f
-        binding.edtStok.keyListener = null
+
+        stokLocked = true
+
+        binding.tvLabelJumlahAwal.text =
+            "Jumlah Awal (Terkunci karena sudah ada transaksi)"
+
+        binding.groupJumlahAwal.isEnabled = false
+
+        binding.edtStok.apply {
+            isEnabled = false
+            clearFocus()
+            setOnTouchListener { _, _ -> true }
+
+            setBackgroundResource(R.drawable.bg_input_rounded_disabled)
+            setTextColor(
+                ContextCompat.getColor(this@AddBarangActivity, R.color.gray)
+            )
+        }
+
+        binding.root.requestFocus()
     }
 
     private fun prepareImage(): MultipartBody.Part? {
